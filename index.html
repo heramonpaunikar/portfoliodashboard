@@ -194,13 +194,13 @@
             <!-- 1. Total Invested Amount -->
             <div class="p-4 rounded-xl glass-card card-inner-shadow">
                 <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Invested Amount</p>
-                <p id="totalInvested" class="returns-value font-extrabold text-white mt-1">₹0.00</p>
+                <p id="totalInvested" class="returns-value font-extrabold text-white mt-1">₹0</p>
             </div>
 
             <!-- 2. Total Current Value (Invested amount now) -->
             <div id="currentValueCard" class="p-4 rounded-xl glass-card card-inner-shadow transition duration-300">
                 <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Current Value</p>
-                <p id="totalCurrentValue" class="returns-value font-extrabold text-white mt-1">₹0.00</p>
+                <p id="totalCurrentValue" class="returns-value font-extrabold text-white mt-1">₹0</p>
             </div>
 
             <!-- 3. Total Returns in % -->
@@ -228,13 +228,13 @@
                     <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Net Gain/Loss (₹)</p>
                     <div class="flex items-center space-x-2 mt-1">
                         <i id="todayGainIcon" data-lucide="activity" class="w-7 h-7 text-gray-500"></i>
-                        <p id="todayGainValue" class="returns-value font-extrabold text-white">₹0.00</p>
+                        <p id="todayGainValue" class="returns-value font-extrabold text-white">₹0</p>
                     </div>
                 </div>
 
                 <!-- Daily Returns (%) -->
                 <div class="flex flex-col border-l border-gray-700/50 pl-4">
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Daily Returns (%)</p>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Daily Returns</p>
                     <p id="todayReturnsPercentage" class="returns-value font-extrabold text-white mt-1">0.00%</p>
                 </div>
             </div>
@@ -334,12 +334,13 @@
             messageBox.classList.remove('flex');
         });
 
-        // Format number to currency string, using INR (Indian Rupees)
+        // Format number to currency string, removing decimal places for large numbers
         const formatCurrency = (amount) => {
             return new Intl.NumberFormat('en-IN', {
                 style: 'currency',
                 currency: 'INR',
-                minimumFractionDigits: 2,
+                minimumFractionDigits: 0, // Set to 0 to remove decimals for whole numbers
+                maximumFractionDigits: 0, // Set to 0 to remove decimals for whole numbers
             }).format(amount);
         };
         
