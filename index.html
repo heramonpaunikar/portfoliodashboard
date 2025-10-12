@@ -12,23 +12,30 @@
     <link rel="manifest" href="/site.webmanifest"> <!-- Placeholder for full PWA support -->
     <!-- END: App/Home Screen Icon Configuration -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- GOOGLE FONT: INTER (Professional, Modern Sans-Serif) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <!-- Chart.js for visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- Lucide Icons for better visuals -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
+        /* Define the rich gold color */
+        :root {
+            --color-gold: #FFD700; /* Rich Gold */
+            --color-deep-black: #0A0A0A; /* Deeper background */
+            --color-card-bg: #181818; /* Dark charcoal card background (mostly overridden by glass) */
+            --color-text-primary: #EAEAEA; /* Off-white text */
+        }
+
         body {
-            /* Changed to Arial, with fallbacks */
-            font-family: Arial, sans-serif;
-            background-color: #0d1117; /* Dark background */
-            color: #c9d1d9; /* Light text */
-            font-weight: bold; /* Applying bold to the entire body */
+            /* Changed from Arial, sans-serif to Inter */
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-deep-black); 
+            color: var(--color-text-primary); 
+            font-weight: 500; /* Medium weight for general text */
         }
-        /* Custom font for monetary values is now just Arial, bold */
-        .value-font {
-            font-family: Arial, sans-serif;
-        }
-        /* Custom scrollbar for better look on dark theme */
+
+        /* --- Custom Scrollbar --- */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -39,94 +46,203 @@
         ::-webkit-scrollbar-track {
             background-color: #161b22;
         }
-        /* Gradient for the main title */
+
+        /* --- Glassmorphism Styling --- */
+        .glass-card {
+            /* Override background colors from Tailwind utility classes */
+            background-color: transparent !important;
+            
+            /* Base semi-transparent background (Dark blur) */
+            background: rgba(255, 255, 255, 0.04); /* Very low opacity white */
+            
+            /* Core Glass Effect */
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px); 
+            
+            /* Subtle Border and Shadow */
+            border: 1px solid rgba(255, 215, 0, 0.2) !important; /* Gold border with low opacity */
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* --- Gold Styling --- */
+        /* Gradient for the main title - PURE GOLD ACCENT */
         .title-gradient {
-            background-image: linear-gradient(45deg, #10b981, #34d399, #10b981); /* Emerald green gradient */
+            background-image: linear-gradient(45deg, #FFD700, #F0C000, #FFD700); 
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        /* Inner shadow for card depth */
+        /* Class for glow effect (positive/Golden) - Enhanced for Glass */
+        .glow-gold {
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), inset 0 0 10px rgba(255, 215, 0, 0.5);
+            border-color: rgba(255, 215, 0, 0.8) !important;
+        }
+        /* Class for glow effect (negative) - RED GLOW REMOVED */
+        .glow-red {
+            /* Kept empty to disable the red glow effect */
+        }
+        /* Chart specific style for glow - PURE GOLD ACCENT */
+        #growthChart {
+            filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.9)); 
+        }
+
+        /* --- Layout & Typography --- */
         .card-inner-shadow {
+            /* Keep subtle inner shadow for depth */
             box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 1px 3px 0 rgba(0, 0, 0, 0.1);
         }
-        /* Returns text size (reduced from 2.25rem to 1.875rem) */
         .returns-value {
+            /* Increased font size for impact */
             font-size: 1.875rem; /* text-3xl equivalent */
+            font-weight: 800; /* Extra bold for key values */
         }
-        /* Class for glow effect (positive) */
-        .glow-green {
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5); /* Emerald-500 */
-        }
-        /* Class for glow effect (negative) */
-        .glow-red {
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); /* Red-500 */
-        }
-        /* Chart specific style for glow */
-        #growthChart {
-            filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.8)); /* Soft glow effect */
-        }
-        /* Style for the select dropdown */
         .timeframe-select {
-            background-color: #1f2937; /* Darker bg */
-            color: #d1d5db; /* Light text */
-            border: 1px solid #374151;
+            /* Adjust select input for glass theme */
+            background-color: rgba(255, 255, 255, 0.1); 
+            color: var(--color-text-primary); 
+            border: 1px solid rgba(255, 215, 0, 0.3);
             padding: 8px 12px;
             border-radius: 8px;
-            font-weight: bold;
-            appearance: none; /* Hide default arrow */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E</polyline>%3C/svg>%");
+            font-weight: 600; /* Semi-bold */
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23FFD700' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E</polyline>%3C/svg>%");
             background-repeat: no-repeat;
             background-position: right 8px center;
             background-size: 16px;
+        }
+        
+        /* --- Dark Animations (Subtle Background Glow) --- */
+        .animated-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -10;
+            overflow: hidden;
+            pointer-events: none; /* Ensure it doesn't block interaction */
+        }
+        .glow-spot {
+            position: absolute;
+            width: 50vh;
+            height: 50vh;
+            border-radius: 50%;
+            opacity: 0.1;
+            filter: blur(120px);
+            /* Using the enhanced glow-move animation */
+            will-change: transform, opacity;
+        }
+        
+        /* ENHANCED LOOP ANIMATION KEYFRAMES */
+        @keyframes glow-move {
+            0% { transform: translate(-50px, -50px) scale(1.0); opacity: 0.2; } /* Start slightly off-screen, higher opacity */
+            33% { transform: translate(300px, -200px) scale(1.1); opacity: 0.15; } /* Larger movement */
+            66% { transform: translate(-200px, 300px) scale(0.9); opacity: 0.25; } /* Larger movement and subtle pulse */
+            100% { transform: translate(-50px, -50px) scale(1.0); opacity: 0.2; } /* Returns to start */
+        }
+
+        /* Applying the enhanced looping animation to spots with varied speeds */
+        .spot-1 { 
+            background-color: var(--color-gold); 
+            top: 5%; left: 5%; 
+            animation: glow-move 35s infinite alternate ease-in-out; /* Slower, more deliberate loop */
+        }
+        .spot-2 { 
+            background-color: #4a148c; 
+            bottom: 10%; right: 10%; width: 60vh; height: 60vh; 
+            animation: glow-move 40s infinite alternate ease-in-out; 
+            animation-delay: 10s; /* Delayed start */
+        }
+        .spot-3 { 
+            background-color: var(--color-gold); 
+            bottom: 20%; left: 20%; 
+            animation: glow-move 45s infinite alternate ease-in-out; 
+            animation-delay: 20s; 
+            opacity: 0.15; /* Slightly less visible */
         }
     </style>
 </head>
 <body class="min-h-screen p-4 sm:p-8">
 
-    <div class="max-w-4xl mx-auto">
+    <!-- DARK ANIMATED BACKGROUND -->
+    <div class="animated-background">
+        <div class="glow-spot spot-1"></div>
+        <div class="glow-spot spot-2"></div>
+        <div class="glow-spot spot-3"></div>
+    </div>
+    <!-- END DARK ANIMATED BACKGROUND -->
+
+    <div class="max-w-4xl mx-auto relative z-10">
         
         <!-- HEADER & INVESTOR NAME (1) & DATE (2) -->
-        <header class="mb-6 p-4 bg-gray-800 rounded-xl shadow-2xl border border-gray-700">
-            <h1 class="text-3xl font-extrabold mb-3 title-gradient">Personal Investment Tracker</h1>
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-1 sm:space-y-0 text-sm">
-                <div class="flex items-center space-x-1">
-                    <span class="font-medium text-gray-400">Investor:</span>
-                    <span class="text-lg font-extrabold text-white tracking-wider">Hiraman Paunikar</span>
+        <header class="mb-6 p-5 rounded-xl shadow-2xl glass-card">
+            <h1 class="text-4xl font-extrabold mb-4 title-gradient">Personal Investment Tracker</h1>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm">
+                <div class="flex flex-col">
+                    <span class="font-light text-gray-400 uppercase tracking-widest text-xs">Investor Name</span>
+                    <span class="text-xl font-bold text-white tracking-wider mt-1">Hiraman Paunikar</span>
                 </div>
-                <div class="flex items-center space-x-1">
-                    <span class="font-medium text-gray-400">Date of Investment:</span>
-                    <span class="text-base font-bold text-white tracking-wide">12 / 10 / 2025</span> <!-- UPDATED DISPLAY DATE -->
+                <div class="flex flex-col sm:text-right">
+                    <span class="font-light text-gray-400 uppercase tracking-widest text-xs">Investment Date</span>
+                    <span class="text-xl font-bold text-white tracking-wide mt-1">12 / 10 / 2025</span>
                 </div>
             </div>
         </header>
 
-        <!-- SUMMARY STATS -->
-        <div id="summaryStats" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <!-- Total Invested Amount -->
-            <div class="bg-gray-900 p-4 rounded-xl shadow-2xl card-inner-shadow border border-gray-700">
+        <!-- SUMMARY STATS (3 Cards) - Adjusted grid for 3 columns on desktop/tablet -->
+        <div id="summaryStats" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+            <!-- 1. Total Invested Amount -->
+            <div class="p-4 rounded-xl glass-card card-inner-shadow">
                 <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Invested Amount</p>
-                <p id="totalInvested" class="returns-value font-extrabold text-gray-100 mt-1 value-font">₹0.00</p>
+                <p id="totalInvested" class="returns-value font-extrabold text-white mt-1">₹0.00</p>
             </div>
 
-            <!-- Total Current Value (Invested amount now) -->
-            <div id="currentValueCard" class="bg-gray-900 p-4 rounded-xl shadow-2xl card-inner-shadow border border-gray-700 transition duration-300">
+            <!-- 2. Total Current Value (Invested amount now) -->
+            <div id="currentValueCard" class="p-4 rounded-xl glass-card card-inner-shadow transition duration-300">
                 <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Current Value</p>
-                <p id="totalCurrentValue" class="returns-value font-extrabold text-gray-100 mt-1 value-font">₹0.00</p>
+                <p id="totalCurrentValue" class="returns-value font-extrabold text-white mt-1">₹0.00</p>
             </div>
 
-            <!-- Total Returns in % -->
-            <div id="returnsCard" class="bg-gray-900 p-4 rounded-xl shadow-2xl card-inner-shadow border border-gray-700 transition duration-300">
+            <!-- 3. Total Returns in % -->
+            <div id="returnsCard" class="p-4 rounded-xl glass-card card-inner-shadow transition duration-300">
                 <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Returns (%)</p>
                 <div class="flex items-center space-x-2 mt-1">
                      <i id="returnsIcon" data-lucide="activity" class="w-6 h-6 text-gray-500"></i>
-                    <p id="totalReturnsPercentage" class="returns-value font-extrabold text-red-400 value-font">0.00%</p>
+                    <p id="totalReturnsPercentage" class="returns-value font-extrabold text-white">0.00%</p>
                 </div>
             </div>
         </div>
         
+        <!-- TODAY'S GAIN SECTION (MOVED ABOVE GRAPH) -->
+        <div class="p-5 rounded-xl glass-card mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-white title-gradient">Today's Market Snapshot</h2>
+                <span id="todayDate" class="font-light text-gray-400 uppercase tracking-widest text-sm"></span>
+            </div>
+            
+            <!-- The actual card content with 2 metrics -->
+            <div id="todayGainCard" class="grid grid-cols-2 gap-4 p-4 rounded-xl glass-card transition duration-300">
+                
+                <!-- Daily Net Gain/Loss (Rupees) -->
+                <div class="flex flex-col">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Net Gain/Loss (₹)</p>
+                    <div class="flex items-center space-x-2 mt-1">
+                        <i id="todayGainIcon" data-lucide="activity" class="w-7 h-7 text-gray-500"></i>
+                        <p id="todayGainValue" class="returns-value font-extrabold text-white">₹0.00</p>
+                    </div>
+                </div>
+
+                <!-- Daily Returns (%) -->
+                <div class="flex flex-col border-l border-gray-700/50 pl-4">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Daily Returns (%)</p>
+                    <p id="todayReturnsPercentage" class="returns-value font-extrabold text-white mt-1">0.00%</p>
+                </div>
+            </div>
+        </div>
+        <!-- END TODAY'S GAIN SECTION -->
+
         <!-- CHART CONTROLS & GRAPH -->
-        <div class="bg-gray-800 p-4 rounded-xl shadow-2xl border border-gray-700 mb-8">
+        <div class="p-4 rounded-xl glass-card mb-8">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-bold text-white">Simulated Growth (₹)</h2>
                 <select id="timeframeSelect" class="timeframe-select">
@@ -142,18 +258,20 @@
             </div>
         </div>
 
+
         <!-- DISCLAIMER LINE - Gray background for subtlety -->
-        <div class="p-3 bg-gray-800 rounded-xl text-center text-gray-400 shadow-md border border-gray-700 text-sm">
+        <div class="p-3 rounded-xl glass-card text-center text-gray-400 shadow-md text-sm">
              **Disclaimer:** Investments are subject to market risks. Read all scheme related documents carefully. Past performance is not indicative of future results.
         </div>
     </div>
 
     <!-- Message Box / Modal Structure (instead of alert) -->
-    <div id="messageBox" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4">
-        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-sm w-full">
-            <h3 id="messageTitle" class="text-xl font-bold mb-3 text-green-400">Message</h3>
+    <div id="messageBox" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center p-4 z-50">
+        <!-- Applying glass effect to modal for consistency -->
+        <div class="p-6 rounded-xl shadow-2xl max-w-sm w-full border border-yellow-400 glow-gold glass-card">
+            <h3 id="messageTitle" class="text-xl font-bold mb-3 text-yellow-400">Message</h3>
             <p id="messageText" class="text-gray-300 mb-4"></p>
-            <button id="messageCloseButton" class="w-full py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-200">
+            <button id="messageCloseButton" class="w-full py-2 bg-yellow-600 hover:bg-yellow-700 text-gray-900 font-bold rounded-lg transition duration-200">
                 Close
             </button>
         </div>
@@ -168,9 +286,10 @@
         // --- DATA SETUP ---
         const INVESTMENT_START_DATE = '2025-10-12'; 
         const INITIAL_AMOUNT = 30000;
-        // TARGET_ANNUAL_RATE is the default rate for 1 year and 3 years (now unused due to explicit targets)
-        const TARGET_ANNUAL_RATE = 5.5; 
+        // NOTE: The code assumes this is the current (simulated) date for tracking daily movement
         const SIMULATION_TODAY = new Date('2025-10-12'); 
+        // Define a minimal daily gain to ensure the "no loss" condition is met with a positive number
+        const MIN_DAILY_GAIN = INITIAL_AMOUNT * 0.0001; // e.g., 0.01% of initial amount (₹3.00)
 
         let currentCycleDays = 30; // Initial cycle days
         
@@ -183,6 +302,14 @@
         const returnsCardEl = document.getElementById('returnsCard');
         const chartCanvas = document.getElementById('growthChart');
         const timeframeSelectEl = document.getElementById('timeframeSelect');
+        
+        // New elements for Today's Gain/Snapshot
+        const todayDateEl = document.getElementById('todayDate');
+        const todayGainCardEl = document.getElementById('todayGainCard');
+        const todayGainValueEl = document.getElementById('todayGainValue');
+        const todayGainIconEl = document.getElementById('todayGainIcon');
+        const todayReturnsPercentageEl = document.getElementById('todayReturnsPercentage');
+
         let dailyGrowthChart;
         
         // --- EVENT LISTENER ---
@@ -220,47 +347,46 @@
         const formatPercentage = (percent) => {
             return `${percent.toFixed(2)}%`;
         };
-        
-        // Utility to calculate date label for the chart
-        const formatDateLabel = (days) => {
-            const date = new Date(INVESTMENT_START_DATE);
-            date.setDate(date.getDate() + days);
-            // Format as DD/MM
-            return date.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit' });
-        };
 
+        // Format date to a readable string (e.g., Oct 12, 2025)
+        const formatDate = (date) => {
+             return date.toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' }).toUpperCase();
+        }
+        
         /**
          * Calculates the compounded final target value based on the total number of days.
-         * Explicitly targets 30 days for ₹31,750, 6 months for ₹40,000, 1 year for ₹50,000, and 3 years for ₹90,000.
+         * Explicitly targets different periods based on requested minimum 5.5% growth in 30 days.
          * @param {number} totalDays The total duration of the investment.
          * @returns {number} The final target value.
          */
         function calculateCompoundedTarget(totalDays) {
-            // Explicitly set 30-day target to ₹31,750
+            // Set minimum 5.5% growth target for 30 days
             if (totalDays === 30) {
-                const TARGET_AMOUNT_30_DAYS = 31750;
+                // 30,000 * 1.055 = 31,650
+                const TARGET_AMOUNT_30_DAYS = 31650; 
                 return TARGET_AMOUNT_30_DAYS;
             }
 
-            // Explicitly set 6-month target to ₹40,000
+            // Scale long-term targets logically above 5.5%
             if (totalDays === 180) {
-                const TARGET_AMOUNT_6_MONTHS = 40000;
+                // Approx 8.5% growth (30,000 * 1.085)
+                const TARGET_AMOUNT_6_MONTHS = 32550;
                 return TARGET_AMOUNT_6_MONTHS;
             }
 
-            // Explicitly set 1-year target to ₹50,000 (NEW)
             if (totalDays === 365) {
-                const TARGET_AMOUNT_1_YEAR = 50000;
+                // Approx 15% growth (30,000 * 1.15)
+                const TARGET_AMOUNT_1_YEAR = 34500;
                 return TARGET_AMOUNT_1_YEAR;
             }
 
-            // Explicitly set 3-year target to ₹90,000 (NEW)
             if (totalDays === 1095) {
-                const TARGET_AMOUNT_3_YEARS = 90000;
+                // Approx 30% growth (30,000 * 1.30)
+                const TARGET_AMOUNT_3_YEARS = 39000;
                 return TARGET_AMOUNT_3_YEARS;
             }
 
-            // Fallback (should not be hit with current setup)
+            // Fallback 
             return INITIAL_AMOUNT;
         }
 
@@ -270,17 +396,19 @@
         /**
          * Calculates the simulated current value for a specific day index,
          * ensuring the value fluctuates but hits the final compounded target.
-         * @param {number} dayIndex - The day within the cycle (0 to totalDays).
+         * * @param {number} dayIndex - The day within the cycle (0 to totalDays).
          * @param {number} totalDays - The total length of the cycle (30, 180, 365, etc.).
+         * @param {number} [previousValue=0] - The value from the previous day, used to enforce non-loss constraint for 30 days.
          * @returns {number} The calculated, volatile current value for that day.
          */
-        function calculateVolatileValueForDay(dayIndex, totalDays) {
+        function calculateVolatileValueForDay(dayIndex, totalDays, previousValue = 0) {
             const FINAL_TARGET_VALUE = calculateCompoundedTarget(totalDays);
             const TOTAL_TARGET_GAIN = FINAL_TARGET_VALUE - INITIAL_AMOUNT;
             
             if (dayIndex === 0) {
                 return INITIAL_AMOUNT;
             }
+            // Ensure the last day hits the exact target
             if (dayIndex === totalDays) {
                  return FINAL_TARGET_VALUE;
             }
@@ -289,24 +417,34 @@
             const linearGain = TOTAL_TARGET_GAIN * (dayIndex / totalDays);
             let simulatedValue = INITIAL_AMOUNT + linearGain;
 
-            // 2. Introduce Chaotic Volatility
-            // Base volatility is slightly higher for the 30-day view, lower for long term.
-            const baseVolatility = totalDays <= 30 ? 0.01 : 0.005; 
-            
-            // maxDeviation scales volatility with the duration, then dampened by a factor to prevent extreme spikes
-            const maxDeviation = (INITIAL_AMOUNT * baseVolatility) * (totalDays / 30) / Math.sqrt(totalDays); 
+            // 2. Introduce Chaotic Volatility (Adjusted for smoother, more consistent growth)
+            const baseVolatility = totalDays <= 30 ? 0.005 : 0.002; // Reduced volatility
+            const maxDeviation = (INITIAL_AMOUNT * baseVolatility) / Math.sqrt(totalDays); 
             
             const chaoticFactor = (Math.random() - 0.5) * 2; 
             const deviation = chaoticFactor * maxDeviation; 
             simulatedValue += deviation;
             
-            // 3. Apply Correction Force to ensure it hits the target at the end
+            // 3. Apply a STRONGER Correction Force 
+            const CORRECTION_FACTOR = 10; 
             const remainingDays = totalDays - dayIndex;
             if (remainingDays > 0) {
                 const requiredFinalValue = FINAL_TARGET_VALUE - simulatedValue;
-                // Correction force is stronger the closer we get to the end
-                simulatedValue += requiredFinalValue * (1 / (remainingDays * 5)); 
+                simulatedValue += requiredFinalValue * (1 / (remainingDays * CORRECTION_FACTOR)); 
             }
+            
+            // --- NON-LOSS CONSTRAINT IMPLEMENTATION ---
+            // The constraint only applies if we are looking at the 30-day cycle 
+            // AND a previous value has been supplied (i.e., we are enforcing the sequential daily no-loss rule).
+            if (totalDays === 30 && previousValue > 0) {
+                
+                // If the simulated value is lower than yesterday (previousValue)
+                if (simulatedValue < previousValue) {
+                    // Force the value to be slightly higher than yesterday, ensuring a positive daily return.
+                    simulatedValue = previousValue + MIN_DAILY_GAIN;
+                }
+            }
+
 
             return Math.max(INITIAL_AMOUNT * 0.90, simulatedValue); 
         }
@@ -314,41 +452,71 @@
         /**
          * Calculates the simulated current value for the current day based on time elapsed.
          * Summary always uses the 30-day period as the basis for its daily movement.
+         * NOTE: This is where the non-loss constraint is explicitly triggered for the daily summary.
+         * @param {number} offsetDays - Number of days to offset (0 for today, -1 for yesterday).
          * @returns {number} The current calculated value based on time elapsed since INVESTMENT_START_DATE.
          */
-        function calculateAutomatedCurrentValue() {
+        function calculateAutomatedCurrentValue(offsetDays = 0) {
             const startDate = new Date(INVESTMENT_START_DATE);
             const TODAY = SIMULATION_TODAY; 
+            const totalCycleDays = 30; // Summary always uses 30 days as total period for daily movement
 
             const timeElapsedMs = TODAY.getTime() - startDate.getTime();
-            let daysElapsed = Math.max(0, Math.floor(timeElapsedMs / (1000 * 60 * 60 * 24)));
-            
-            const totalCycleDays = 30; // Summary always uses 30 days as total period for daily movement
+            // Add offsetDays to the total days elapsed
+            let daysElapsed = Math.max(0, Math.floor(timeElapsedMs / (1000 * 60 * 60 * 24))) + offsetDays;
             const dayIndex = daysElapsed; 
             
-            if (dayIndex === 0) {
+            if (dayIndex <= 0) { 
                 return INITIAL_AMOUNT;
             }
             
-            // If more than 30 days have passed, lock the value at the compounded 30-day target.
-            // Note: Since SIMULATION_TODAY is 2025-10-12, this section won't be hit until 2025-11-11
             if (dayIndex >= totalCycleDays) {
                 return calculateCompoundedTarget(totalCycleDays);
             }
 
-            // Calculate the volatile value for the actual day elapsed
-            return calculateVolatileValueForDay(dayIndex, totalCycleDays);
+            // Get the value from the PREVIOUS day's index.
+            const valueYesterday = calculateVolatileValueForDay(dayIndex - 1, totalCycleDays);
+            
+            // Calculate today's value, passing yesterday's value to enforce the non-loss floor.
+            return calculateVolatileValueForDay(dayIndex, totalCycleDays, valueYesterday);
+        }
+
+        /**
+         * Calculates the difference between today's and yesterday's simulated value.
+         * @returns {{gain: number, percentage: number, yesterdayValue: number}} Daily gain, percentage gain, and yesterday's closing value.
+         */
+        function calculateDailyReturns() {
+            // valueToday and valueYesterday will now respect the non-loss constraint (for 30-day period)
+            const valueToday = calculateAutomatedCurrentValue(0);
+            const valueYesterday = calculateAutomatedCurrentValue(-1);
+            
+            const gain = valueToday - valueYesterday;
+            const percentage = valueYesterday > 0 ? (gain / valueYesterday) * 100 : 0;
+            
+            return { gain, percentage, yesterdayValue: valueYesterday };
         }
         
         /**
          * Generates the data points for the entire selected cycle for the chart.
-         * Implements weekly aggregation for longer timeframes.
-         * @returns {{values: number[], labels: string[], pointIndex: number}} Aggregated data for the chart.
          */
         function getChartData() {
             const totalValues = [];
+            let previousValue = INITIAL_AMOUNT; 
+
             for (let i = 0; i <= currentCycleDays; i++) {
-                totalValues.push(calculateVolatileValueForDay(i, currentCycleDays));
+                if (i === 0) {
+                    totalValues.push(INITIAL_AMOUNT);
+                } else if (currentCycleDays === 30) {
+                    // For the 30-day chart, enforce non-loss by passing the previous value
+                    const currentValue = calculateVolatileValueForDay(i, currentCycleDays, previousValue);
+                    totalValues.push(currentValue);
+                    previousValue = currentValue; // Update previousValue for the next iteration
+                } else {
+                    // For long-term charts (6M, 1Y, 3Y), allow dips (no previousValue passed)
+                    const currentValue = calculateVolatileValueForDay(i, currentCycleDays);
+                    totalValues.push(currentValue);
+                    previousValue = currentValue;
+                }
             }
 
             // Aggregate data for cleaner look on longer periods (Weekly aggregation)
@@ -395,45 +563,79 @@
         // 1. Calculate and Update Summary Metrics (Total Returns)
         function updateSummary() {
             const totalInvested = INITIAL_AMOUNT;
-            const totalCurrentValue = calculateAutomatedCurrentValue(); 
-
+            // Get current value (offset 0) for total returns calculation
+            const totalCurrentValue = calculateAutomatedCurrentValue(0); 
+            const dailyReturns = calculateDailyReturns();
             const totalReturn = totalCurrentValue - totalInvested;
             const totalReturnsPercentage = totalInvested > 0 
                 ? (totalReturn / totalInvested) * 100 
                 : 0;
 
-            // Update UI
+            // Update UI for main metrics
             totalInvestedEl.textContent = formatCurrency(totalInvested);
             totalCurrentValueEl.textContent = formatCurrency(totalCurrentValue);
             totalReturnsPercentageEl.textContent = formatPercentage(totalReturnsPercentage);
             
-            // Card Glow and Color coding for returns
-            currentValueCardEl.classList.remove('glow-green', 'glow-red');
-            returnsCardEl.classList.remove('glow-green', 'glow-red');
-            totalReturnsPercentageEl.classList.remove('text-green-400', 'text-red-400', 'text-gray-400');
+            // Card Glow and Color coding for TOTAL returns
+            currentValueCardEl.classList.remove('glow-gold', 'glow-red');
+            returnsCardEl.classList.remove('glow-gold', 'glow-red');
+            totalReturnsPercentageEl.classList.remove('text-yellow-400', 'text-red-400', 'text-gray-400', 'text-white');
             
             if (returnsIconEl) {
-                returnsIconEl.classList.remove('text-green-400', 'text-red-400', 'text-gray-500');
+                returnsIconEl.classList.remove('text-yellow-400', 'text-red-400', 'text-gray-500');
                 
                 if (totalReturn > 0) {
-                    totalReturnsPercentageEl.classList.add('text-green-400');
-                    returnsIconEl.classList.add('text-green-400');
+                    totalReturnsPercentageEl.classList.add('text-yellow-400');
+                    returnsIconEl.classList.add('text-yellow-400');
                     returnsIconEl.setAttribute('data-lucide', 'trending-up');
-                    currentValueCardEl.classList.add('glow-green');
-                    returnsCardEl.classList.add('glow-green');
-                } else if (totalReturn < 0) {
-                    totalReturnsPercentageEl.classList.add('text-red-400');
-                    returnsIconEl.classList.add('text-red-400');
-                    returnsIconEl.setAttribute('data-lucide', 'trending-down');
-                    currentValueCardEl.classList.add('glow-red');
-                    returnsCardEl.classList.add('glow-red');
-                } else {
-                    totalReturnsPercentageEl.classList.add('text-gray-400');
+                    currentValueCardEl.classList.add('glow-gold'); 
+                    returnsCardEl.classList.add('glow-gold'); 
+                } else { 
+                    // Non-positive returns (0% or loss) default to white text, no glow, neutral icon
+                    totalReturnsPercentageEl.classList.add('text-white');
                     returnsIconEl.classList.add('text-gray-500');
-                    returnsIconEl.setAttribute('data-lucide', 'activity');
+                    returnsIconEl.setAttribute('data-lucide', totalReturn < 0 ? 'trending-down' : 'activity');
                 }
-                lucide.createIcons(); 
             }
+            
+            // --- Today's Gain/Loss Update (Snapshot Section) ---
+            const gain = dailyReturns.gain;
+            const percentage = dailyReturns.percentage;
+            
+            // 1. Update Date
+            todayDateEl.textContent = formatDate(SIMULATION_TODAY);
+
+            // 2. Update Rupee Value (using Math.abs is no longer strictly necessary but helps keep formatting consistent)
+            todayGainValueEl.textContent = formatCurrency(gain);
+            
+            // 3. Update Percentage Value
+            todayReturnsPercentageEl.textContent = formatPercentage(percentage);
+
+            // 4. Update Card Glow and Colors
+            todayGainCardEl.classList.remove('glow-gold', 'glow-red');
+            
+            // Remove previous classes for both values
+            todayGainValueEl.classList.remove('text-yellow-400', 'text-red-400', 'text-gray-400', 'text-white');
+            todayReturnsPercentageEl.classList.remove('text-yellow-400', 'text-red-400', 'text-gray-400', 'text-white');
+            todayGainIconEl.classList.remove('text-yellow-400', 'text-red-400', 'text-gray-500');
+
+
+            // Since we enforced non-negative gain, we only need to check if it's greater than 0
+            if (gain > 0) { 
+                todayGainValueEl.classList.add('text-yellow-400');
+                todayReturnsPercentageEl.classList.add('text-yellow-400');
+                todayGainIconEl.classList.add('text-yellow-400');
+                todayGainIconEl.setAttribute('data-lucide', 'trending-up');
+                todayGainCardEl.classList.add('glow-gold'); 
+            } else { // This should only happen on Day 0 or if the calculated gain was exactly 0
+                todayGainValueEl.classList.add('text-white');
+                todayReturnsPercentageEl.classList.add('text-white');
+                todayGainIconEl.classList.add('text-gray-500');
+                todayGainIconEl.setAttribute('data-lucide', 'activity');
+            }
+
+            // Re-create icons to reflect change
+            lucide.createIcons();
         }
         
         /**
@@ -449,11 +651,11 @@
             const labels = chartData.labels;
             const highlightIndex = chartData.pointIndex; 
 
-            // Create a custom gradient for the futuristic area fill
+            // Create a custom gradient for the futuristic area fill (Gold color)
             const chartContext = chartCanvas.getContext('2d');
             const areaGradient = chartContext.createLinearGradient(0, 0, 0, chartCanvas.height);
-            areaGradient.addColorStop(0, 'rgba(16, 185, 129, 0.4)'); 
-            areaGradient.addColorStop(1, 'rgba(16, 185, 129, 0.05)'); 
+            areaGradient.addColorStop(0, 'rgba(255, 215, 0, 0.4)'); /* Gold (FFD700) */
+            areaGradient.addColorStop(1, 'rgba(255, 215, 0, 0.05)'); /* Gold (FFD700) */
 
             // Chart configuration
             const data = {
@@ -461,13 +663,12 @@
                 datasets: [{
                     label: 'Portfolio Value (INR)',
                     data: dataValues,
-                    borderColor: '#34d399', 
+                    borderColor: '#FFD700', /* Pure Gold line */
                     backgroundColor: areaGradient,
                     tension: 0.4, 
                     borderWidth: 3, 
-                    // Highlight the final data point (target)
                     pointRadius: (context) => context.dataIndex === highlightIndex ? 7 : 0, 
-                    pointBackgroundColor: (context) => context.dataIndex === highlightIndex ? '#facc15' : '#34d399', 
+                    pointBackgroundColor: (context) => context.dataIndex === highlightIndex ? '#FFD700' : '#FFD700', 
                     pointBorderWidth: 0,
                     fill: 'start',
                 }]
@@ -481,17 +682,12 @@
                     maintainAspectRatio: false,
                     scales: {
                         x: {
-                            // X-axis display is now completely hidden
                             display: false, 
-                            grid: { color: '#1f2428' },
-                            ticks: {
-                                color: '#9fa8b1',
-                                maxRotation: 45,
-                                minRotation: 45,
-                            }
+                            grid: { color: 'rgba(31, 36, 41, 0.5)' }, /* Darker grid for glass */
+                            ticks: { color: '#9fa8b1' }
                         },
                         y: {
-                            grid: { color: '#1f2428' }, 
+                            grid: { color: 'rgba(31, 36, 41, 0.5)' }, /* Darker grid for glass */
                             ticks: {
                                 color: '#9fa8b1', 
                                 callback: function(value) {
@@ -505,15 +701,14 @@
                         tooltip: {
                             mode: 'index',
                             intersect: false,
-                            backgroundColor: 'rgba(31, 41, 55, 0.9)', 
-                            titleColor: '#34d399', 
-                            bodyColor: '#c9d1d9',
+                            backgroundColor: 'rgba(10, 10, 10, 0.9)', /* Darker tooltip background */
+                            titleColor: '#FFD700', /* Gold tooltip title */
+                            bodyColor: '#EAEAEA',
                             callbacks: {
                                 label: function(context) {
                                     return ` Value: ${formatCurrency(context.parsed.y)}`;
                                 },
                                 title: function(context) {
-                                    // Use 'label' from the chart data (Day X or Week X)
                                      return context[0].dataIndex === highlightIndex ? `${context[0].label} (Target)` : context[0].label;
                                 }
                             }
