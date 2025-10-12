@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Investment Portfolio Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Lucide Icons for better visuals -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            /* Changed to Arial, with fallbacks */
+            font-family: Arial, sans-serif;
+            background-color: #0d1117; /* Dark background */
+            color: #c9d1d9; /* Light text */
+            font-weight: bold; /* Applying bold to the entire body */
+        }
+        /* Custom font for monetary values is now just Arial, bold */
+        .value-font {
+            font-family: Arial, sans-serif;
+        }
+        /* Custom scrollbar for better look on dark theme */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #30363d;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background-color: #161b22;
+        }
+        /* Gradient for the main title */
+        .title-gradient {
+            background-image: linear-gradient(45deg, #10b981, #34d399, #10b981); /* Emerald green gradient */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        /* Inner shadow for card depth */
+        .card-inner-shadow {
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+        /* Returns text size (reduced from 2.25rem to 1.875rem) */
+        .returns-value {
+            font-size: 1.875rem; /* text-3xl equivalent */
+        }
+        /* Class for glow effect (positive) */
+        .glow-green {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5); /* Emerald-500 */
+        }
+        /* Class for glow effect (negative) */
+        .glow-red {
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); /* Red-500 */
+        }
+        /* Chart specific style for glow */
+        #growthChart {
+            filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.8)); /* Soft glow effect */
+        }
+        /* Style for the select dropdown */
+        .timeframe-select {
+            background-color: #1f2937; /* Darker bg */
+            color: #d1d5db; /* Light text */
+            border: 1px solid #374151;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            appearance: none; /* Hide default arrow */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg>%");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 16px;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 sm:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        
+        <!-- HEADER & INVESTOR NAME (1) & DATE (2) -->
+        <header class="mb-6 p-4 bg-gray-800 rounded-xl shadow-2xl border border-gray-700">
+            <h1 class="text-3xl font-extrabold mb-3 title-gradient">Personal Investment Tracker</h1>
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-1 sm:space-y-0 text-sm">
+                <div class="flex items-center space-x-1">
+                    <span class="font-medium text-gray-400">Investor:</span>
+                    <span class="text-lg font-extrabold text-white tracking-wider">Hiraman Paunikar</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <span class="font-medium text-gray-400">Date of Investment:</span>
+                    <span class="text-base font-bold text-white tracking-wide">12 / 10 / 2025</span> <!-- UPDATED DISPLAY DATE -->
+                </div>
+            </div>
+        </header>
+
+        <!-- SUMMARY STATS -->
+        <div id="summaryStats" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <!-- Total Invested Amount -->
+            <div class="bg-gray-900 p-4 rounded-xl shadow-2xl card-inner-shadow border border-gray-700">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Invested Amount</p>
+                <p id="totalInvested" class="returns-value font-extrabold text-gray-100 mt-1 value-font">₹0.00</p>
+            </div>
+
+            <!-- Total Current Value (Invested amount now) -->
+            <div id="currentValueCard" class="bg-gray-900 p-4 rounded-xl shadow-2xl card-inner-shadow border border-gray-700 transition duration-300">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Current Value</p>
+                <p id="totalCurrentValue" class="returns-value font-extrabold text-gray-100 mt-1 value-font">₹0.00</p>
+            </div>
+
+            <!-- Total Returns in % -->
+            <div id="returnsCard" class="bg-gray-900 p-4 rounded-xl shadow-2xl card-inner-shadow border border-gray-700 transition duration-300">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Returns (%)</p>
+                <div class="flex items-center space-x-2 mt-1">
+                     <i id="returnsIcon" data-lucide="activity" class="w-6 h-6 text-gray-500"></i>
+                    <p id="totalReturnsPercentage" class="returns-value font-extrabold text-red-400 value-font">0.00%</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CHART CONTROLS & GRAPH -->
+        <div class="bg-gray-800 p-4 rounded-xl shadow-2xl border border-gray-700 mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-white">Simulated Growth (₹)</h2>
+                <select id="timeframeSelect" class="timeframe-select">
+                    <option value="30">30 Days</option>
+                    <option value="180">6 Months</option>
+                    <option value="365">1 Year</option>
+                    <option value="1095">3 Years</option>
+                </select>
+            </div>
+            
+            <div class="h-72">
+                <canvas id="growthChart"></canvas>
+            </div>
+        </div>
+
+        <!-- DISCLAIMER LINE - Gray background for subtlety -->
+        <div class="p-3 bg-gray-800 rounded-xl text-center text-gray-400 shadow-md border border-gray-700 text-sm">
+             **Disclaimer:** Investments are subject to market risks. Read all scheme related documents carefully. Past performance is not indicative of future results.
+        </div>
+    </div>
+
+    <!-- Message Box / Modal Structure (instead of alert) -->
+    <div id="messageBox" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4">
+        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-sm w-full">
+            <h3 id="messageTitle" class="text-xl font-bold mb-3 text-green-400">Message</h3>
+            <p id="messageText" class="text-gray-300 mb-4"></p>
+            <button id="messageCloseButton" class="w-full py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-200">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide Icons
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+
+        // --- DATA SETUP ---
+        const INVESTMENT_START_DATE = '2025-10-12'; 
+        const INITIAL_AMOUNT = 30000;
+        // TARGET_ANNUAL_RATE is the default rate for 1 year and 3 years (now unused due to explicit targets)
+        const TARGET_ANNUAL_RATE = 5.5; 
+        const SIMULATION_TODAY = new Date('2025-10-12'); 
+
+        let currentCycleDays = 30; // Initial cycle days
+        
+        // --- DOM ELEMENTS ---
+        const totalInvestedEl = document.getElementById('totalInvested');
+        const totalCurrentValueEl = document.getElementById('totalCurrentValue');
+        const totalReturnsPercentageEl = document.getElementById('totalReturnsPercentage');
+        const returnsIconEl = document.getElementById('returnsIcon');
+        const currentValueCardEl = document.getElementById('currentValueCard');
+        const returnsCardEl = document.getElementById('returnsCard');
+        const chartCanvas = document.getElementById('growthChart');
+        const timeframeSelectEl = document.getElementById('timeframeSelect');
+        let dailyGrowthChart;
+        
+        // --- EVENT LISTENER ---
+        timeframeSelectEl.addEventListener('change', (event) => {
+            currentCycleDays = parseInt(event.target.value, 10);
+            renderApp();
+        });
+
+        // --- UTILITY FUNCTIONS ---
+        
+        function showMessageBox(title, message) {
+            const messageBox = document.getElementById('messageBox');
+            document.getElementById('messageTitle').textContent = title;
+            document.getElementById('messageText').textContent = message;
+            messageBox.classList.remove('hidden');
+            messageBox.classList.add('flex');
+        }
+
+        document.getElementById('messageCloseButton').addEventListener('click', () => {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.classList.add('hidden');
+            messageBox.classList.remove('flex');
+        });
+
+        // Format number to currency string, using INR (Indian Rupees)
+        const formatCurrency = (amount) => {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                minimumFractionDigits: 2,
+            }).format(amount);
+        };
+        
+        // Format number to percentage string
+        const formatPercentage = (percent) => {
+            return `${percent.toFixed(2)}%`;
+        };
+        
+        // Utility to calculate date label for the chart
+        const formatDateLabel = (days) => {
+            const date = new Date(INVESTMENT_START_DATE);
+            date.setDate(date.getDate() + days);
+            // Format as DD/MM
+            return date.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit' });
+        };
+
+        /**
+         * Calculates the compounded final target value based on the total number of days.
+         * Explicitly targets 30 days for ₹31,750, 6 months for ₹40,000, 1 year for ₹50,000, and 3 years for ₹90,000.
+         * @param {number} totalDays The total duration of the investment.
+         * @returns {number} The final target value.
+         */
+        function calculateCompoundedTarget(totalDays) {
+            // Explicitly set 30-day target to ₹31,750
+            if (totalDays === 30) {
+                const TARGET_AMOUNT_30_DAYS = 31750;
+                return TARGET_AMOUNT_30_DAYS;
+            }
+
+            // Explicitly set 6-month target to ₹40,000
+            if (totalDays === 180) {
+                const TARGET_AMOUNT_6_MONTHS = 40000;
+                return TARGET_AMOUNT_6_MONTHS;
+            }
+
+            // Explicitly set 1-year target to ₹50,000 (NEW)
+            if (totalDays === 365) {
+                const TARGET_AMOUNT_1_YEAR = 50000;
+                return TARGET_AMOUNT_1_YEAR;
+            }
+
+            // Explicitly set 3-year target to ₹90,000 (NEW)
+            if (totalDays === 1095) {
+                const TARGET_AMOUNT_3_YEARS = 90000;
+                return TARGET_AMOUNT_3_YEARS;
+            }
+
+            // Fallback (should not be hit with current setup)
+            return INITIAL_AMOUNT;
+        }
+
+
+        // --- CORE AUTOMATION LOGIC (WITH VOLATILITY) ---
+
+        /**
+         * Calculates the simulated current value for a specific day index,
+         * ensuring the value fluctuates but hits the final compounded target.
+         * @param {number} dayIndex - The day within the cycle (0 to totalDays).
+         * @param {number} totalDays - The total length of the cycle (30, 180, 365, etc.).
+         * @returns {number} The calculated, volatile current value for that day.
+         */
+        function calculateVolatileValueForDay(dayIndex, totalDays) {
+            const FINAL_TARGET_VALUE = calculateCompoundedTarget(totalDays);
+            const TOTAL_TARGET_GAIN = FINAL_TARGET_VALUE - INITIAL_AMOUNT;
+            
+            if (dayIndex === 0) {
+                return INITIAL_AMOUNT;
+            }
+            if (dayIndex === totalDays) {
+                 return FINAL_TARGET_VALUE;
+            }
+            
+            // 1. Calculate the expected Linear Value at this point
+            const linearGain = TOTAL_TARGET_GAIN * (dayIndex / totalDays);
+            let simulatedValue = INITIAL_AMOUNT + linearGain;
+
+            // 2. Introduce Chaotic Volatility
+            // Base volatility is slightly higher for the 30-day view, lower for long term.
+            const baseVolatility = totalDays <= 30 ? 0.01 : 0.005; 
+            
+            // maxDeviation scales volatility with the duration, then dampened by a factor to prevent extreme spikes
+            const maxDeviation = (INITIAL_AMOUNT * baseVolatility) * (totalDays / 30) / Math.sqrt(totalDays); 
+            
+            const chaoticFactor = (Math.random() - 0.5) * 2; 
+            const deviation = chaoticFactor * maxDeviation; 
+            simulatedValue += deviation;
+            
+            // 3. Apply Correction Force to ensure it hits the target at the end
+            const remainingDays = totalDays - dayIndex;
+            if (remainingDays > 0) {
+                const requiredFinalValue = FINAL_TARGET_VALUE - simulatedValue;
+                // Correction force is stronger the closer we get to the end
+                simulatedValue += requiredFinalValue * (1 / (remainingDays * 5)); 
+            }
+
+            return Math.max(INITIAL_AMOUNT * 0.90, simulatedValue); 
+        }
+
+        /**
+         * Calculates the simulated current value for the current day based on time elapsed.
+         * Summary always uses the 30-day period as the basis for its daily movement.
+         * @returns {number} The current calculated value based on time elapsed since INVESTMENT_START_DATE.
+         */
+        function calculateAutomatedCurrentValue() {
+            const startDate = new Date(INVESTMENT_START_DATE);
+            const TODAY = SIMULATION_TODAY; 
+
+            const timeElapsedMs = TODAY.getTime() - startDate.getTime();
+            let daysElapsed = Math.max(0, Math.floor(timeElapsedMs / (1000 * 60 * 60 * 24)));
+            
+            const totalCycleDays = 30; // Summary always uses 30 days as total period for daily movement
+            const dayIndex = daysElapsed; 
+            
+            if (dayIndex === 0) {
+                return INITIAL_AMOUNT;
+            }
+            
+            // If more than 30 days have passed, lock the value at the compounded 30-day target.
+            // Note: Since SIMULATION_TODAY is 2025-10-12, this section won't be hit until 2025-11-11
+            if (dayIndex >= totalCycleDays) {
+                return calculateCompoundedTarget(totalCycleDays);
+            }
+
+            // Calculate the volatile value for the actual day elapsed
+            return calculateVolatileValueForDay(dayIndex, totalCycleDays);
+        }
+        
+        /**
+         * Generates the data points for the entire selected cycle for the chart.
+         * Implements weekly aggregation for longer timeframes.
+         * @returns {{values: number[], labels: string[], pointIndex: number}} Aggregated data for the chart.
+         */
+        function getChartData() {
+            const totalValues = [];
+            for (let i = 0; i <= currentCycleDays; i++) {
+                totalValues.push(calculateVolatileValueForDay(i, currentCycleDays));
+            }
+
+            // Aggregate data for cleaner look on longer periods (Weekly aggregation)
+            if (currentCycleDays > 30) {
+                const aggregatedValues = [];
+                const aggregatedLabels = [];
+                const aggregationPeriod = 7; // Weekly
+
+                for (let i = 0; i <= currentCycleDays; i += aggregationPeriod) {
+                    let sum = 0;
+                    let count = 0;
+                    // Average the next 7 days
+                    for (let j = 0; j < aggregationPeriod && i + j <= currentCycleDays; j++) {
+                        sum += totalValues[i + j];
+                        count++;
+                    }
+                    if (count > 0) {
+                        aggregatedValues.push(sum / count);
+                        aggregatedLabels.push(`Week ${Math.floor(i / 7) + 1}`);
+                    }
+                }
+                // Ensure the final target point is always included
+                if (aggregatedValues[aggregatedValues.length - 1] !== totalValues[currentCycleDays]) {
+                    aggregatedValues.push(totalValues[currentCycleDays]);
+                    aggregatedLabels.push(`Target (${currentCycleDays} days)`);
+                }
+
+                return { 
+                    values: aggregatedValues, 
+                    labels: aggregatedLabels, 
+                    pointIndex: aggregatedValues.length - 1 
+                };
+            }
+
+            // Default daily data for 30 days
+            const labels = Array.from({ length: currentCycleDays + 1 }, (_, i) => `Day ${i}`);
+            return { 
+                values: totalValues, 
+                labels: labels, 
+                pointIndex: currentCycleDays 
+            };
+        }
+
+        // 1. Calculate and Update Summary Metrics (Total Returns)
+        function updateSummary() {
+            const totalInvested = INITIAL_AMOUNT;
+            const totalCurrentValue = calculateAutomatedCurrentValue(); 
+
+            const totalReturn = totalCurrentValue - totalInvested;
+            const totalReturnsPercentage = totalInvested > 0 
+                ? (totalReturn / totalInvested) * 100 
+                : 0;
+
+            // Update UI
+            totalInvestedEl.textContent = formatCurrency(totalInvested);
+            totalCurrentValueEl.textContent = formatCurrency(totalCurrentValue);
+            totalReturnsPercentageEl.textContent = formatPercentage(totalReturnsPercentage);
+            
+            // Card Glow and Color coding for returns
+            currentValueCardEl.classList.remove('glow-green', 'glow-red');
+            returnsCardEl.classList.remove('glow-green', 'glow-red');
+            totalReturnsPercentageEl.classList.remove('text-green-400', 'text-red-400', 'text-gray-400');
+            
+            if (returnsIconEl) {
+                returnsIconEl.classList.remove('text-green-400', 'text-red-400', 'text-gray-500');
+                
+                if (totalReturn > 0) {
+                    totalReturnsPercentageEl.classList.add('text-green-400');
+                    returnsIconEl.classList.add('text-green-400');
+                    returnsIconEl.setAttribute('data-lucide', 'trending-up');
+                    currentValueCardEl.classList.add('glow-green');
+                    returnsCardEl.classList.add('glow-green');
+                } else if (totalReturn < 0) {
+                    totalReturnsPercentageEl.classList.add('text-red-400');
+                    returnsIconEl.classList.add('text-red-400');
+                    returnsIconEl.setAttribute('data-lucide', 'trending-down');
+                    currentValueCardEl.classList.add('glow-red');
+                    returnsCardEl.classList.add('glow-red');
+                } else {
+                    totalReturnsPercentageEl.classList.add('text-gray-400');
+                    returnsIconEl.classList.add('text-gray-500');
+                    returnsIconEl.setAttribute('data-lucide', 'activity');
+                }
+                lucide.createIcons(); 
+            }
+        }
+        
+        /**
+         * Initializes and renders the Chart.js line graph.
+         */
+        function renderChart() {
+            if (dailyGrowthChart) {
+                dailyGrowthChart.destroy(); // Destroy previous instance if it exists
+            }
+            
+            const chartData = getChartData();
+            const dataValues = chartData.values;
+            const labels = chartData.labels;
+            const highlightIndex = chartData.pointIndex; 
+
+            // Create a custom gradient for the futuristic area fill
+            const chartContext = chartCanvas.getContext('2d');
+            const areaGradient = chartContext.createLinearGradient(0, 0, 0, chartCanvas.height);
+            areaGradient.addColorStop(0, 'rgba(16, 185, 129, 0.4)'); 
+            areaGradient.addColorStop(1, 'rgba(16, 185, 129, 0.05)'); 
+
+            // Chart configuration
+            const data = {
+                labels: labels,
+                datasets: [{
+                    label: 'Portfolio Value (INR)',
+                    data: dataValues,
+                    borderColor: '#34d399', 
+                    backgroundColor: areaGradient,
+                    tension: 0.4, 
+                    borderWidth: 3, 
+                    // Highlight the final data point (target)
+                    pointRadius: (context) => context.dataIndex === highlightIndex ? 7 : 0, 
+                    pointBackgroundColor: (context) => context.dataIndex === highlightIndex ? '#facc15' : '#34d399', 
+                    pointBorderWidth: 0,
+                    fill: 'start',
+                }]
+            };
+
+            const config = {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            // X-axis display is now completely hidden
+                            display: false, 
+                            grid: { color: '#1f2428' },
+                            ticks: {
+                                color: '#9fa8b1',
+                                maxRotation: 45,
+                                minRotation: 45,
+                            }
+                        },
+                        y: {
+                            grid: { color: '#1f2428' }, 
+                            ticks: {
+                                color: '#9fa8b1', 
+                                callback: function(value) {
+                                    return formatCurrency(value).replace('.00', '').replace('₹', '₹');
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(31, 41, 55, 0.9)', 
+                            titleColor: '#34d399', 
+                            bodyColor: '#c9d1d9',
+                            callbacks: {
+                                label: function(context) {
+                                    return ` Value: ${formatCurrency(context.parsed.y)}`;
+                                },
+                                title: function(context) {
+                                    // Use 'label' from the chart data (Day X or Week X)
+                                     return context[0].dataIndex === highlightIndex ? `${context[0].label} (Target)` : context[0].label;
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            dailyGrowthChart = new Chart(chartCanvas, config);
+        }
+
+        // 3. Main render function
+        function renderApp() {
+            updateSummary();
+            renderChart();
+        }
+
+        // INITIALIZATION
+        window.onload = () => {
+            renderApp();
+        };
+
+    </script>
+</body>
+</html>
