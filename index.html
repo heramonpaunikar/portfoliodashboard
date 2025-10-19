@@ -129,8 +129,12 @@
     // Constants
     const INITIAL_PRINCIPAL = 30000;
     const DAILY_RATE = 0.0015; // 0.15% as a decimal
-    // New constant for the daily profit amount, calculated once on the principal
     const DAILY_PROFIT = INITIAL_PRINCIPAL * DAILY_RATE; // 30000 * 0.0015 = 45
+
+    // New constants for time-based growth calculation
+    const MS_PER_DAY = 1000 * 60 * 60 * 24;
+    // Calculate the profit added per millisecond for a smooth visual ticker
+    const PROFIT_PER_MS = DAILY_PROFIT / MS_PER_DAY; 
 
     // DOM Elements
     const daysElapsedEl = document.getElementById('daysElapsed');
@@ -153,14 +157,23 @@
     };
 
     /**
-     * Calculates the simple (non-compounding) growth.
-     * Formula: Final Value = P + (Daily Profit * Days)
-     * @param {number} days - The number of days to simulate.
+     * Calculates the precise simple growth based on milliseconds elapsed since start.
+     * @param {number} ms - The number of milliseconds elapsed since the start.
      * @returns {number} The final calculated value.
      */
-    const calculateGrowth = (days) => {
+    const calculatePreciseGrowth = (ms) => {
+        if (ms < 0) return INITIAL_PRINCIPAL;
+        // Simple interest: Profit per Millisecond multiplied by total milliseconds, added to Principal
+        return INITIAL_PRINCIPAL + (PROFIT_PER_MS * ms);
+    };
+
+    /**
+     * Calculates the simple growth based on full days elapsed (for stable projections).
+     * @param {number} days - The number of full days to simulate.
+     * @returns {number} The final calculated value.
+     */
+    const calculateDailyGrowth = (days) => {
         if (days < 0) return INITIAL_PRINCIPAL;
-        // Simple interest: Daily Profit (₹45) multiplied by days, added to Principal
         return INITIAL_PRINCIPAL + (DAILY_PROFIT * days);
     };
 
@@ -168,7 +181,8 @@
      * Renders a single row in the projection table.
      */
     const renderProjectionRow = (timeframe, days) => {
-        const finalValue = calculateGrowth(days);
+        // Projections use the full days growth calculation for stable future estimates
+        const finalValue = calculateDailyGrowth(days);
         const profit = finalValue - INITIAL_PRINCIPAL;
         const row = document.createElement('tr');
         row.classList.add('hover:bg-gray-50', 'transition');
@@ -190,6 +204,7 @@
      */
     window.updateSimulation = () => {
         const startDateString = startDateInput.value;
+        
         if (!startDateString) {
             // Reset if no date is set
             daysElapsedEl.textContent = 'N/A';
@@ -204,20 +219,19 @@
         const startDate = new Date(startDateString);
         const today = new Date();
 
-        // 1. Calculate Days Elapsed
-        // Set both dates to UTC midnight to avoid issues with timezones/DST when calculating date diff
-        const startUTC = Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
-        const todayUTC = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+        // 1. Calculate Time Elapsed
+        const totalMillisecondsElapsed = today.getTime() - startDate.getTime();
+        const daysDifference = totalMillisecondsElapsed / MS_PER_DAY; // Total days, including fractions
 
-        const msPerDay = 1000 * 60 * 60 * 24;
-        const daysDifference = Math.floor((todayUTC - startUTC) / msPerDay);
-        const daysElapsed = Math.max(0, daysDifference); // Ensure it's not negative
+        // Calculate total full days elapsed (for display and projection base)
+        const daysElapsed = Math.max(0, Math.floor(daysDifference)); 
 
         daysElapsedEl.textContent = daysElapsed;
-        currentDateDisplay.textContent = `As of: ${today.toLocaleDateString()}`;
+        // Display the date and current time to reinforce the real-time update
+        currentDateDisplay.textContent = `As of: ${today.toLocaleDateString()} ${today.toLocaleTimeString()}`; 
 
-        // 2. Calculate Current Value
-        const currentValue = calculateGrowth(daysElapsed);
+        // 2. Calculate Current Value using precise milliseconds
+        const currentValue = calculatePreciseGrowth(totalMillisecondsElapsed);
         const profit = currentValue - INITIAL_PRINCIPAL;
         const profitPercent = (profit / INITIAL_PRINCIPAL) * 100;
 
@@ -240,6 +254,7 @@
         // 3. Render Projections
         projectionBody.innerHTML = ''; // Clear existing rows
         const projectionList = [
+            // Projections start from today and go forward based on daysElapsed
             { timeframe: '1 Month', days: daysElapsed + 30 },
             { timeframe: '3 Months', days: daysElapsed + 90 },
             { timeframe: '6 Months', days: daysElapsed + 180 }, 
@@ -263,6 +278,9 @@
         
         startDateInput.value = `${yyyy}-${mm}-${dd}`;
         updateSimulation();
+        
+        // Start the automatic update every second (1000ms)
+        setInterval(updateSimulation, 1000);
     });
 
     // Optional: Include Firebase initialization boilerplate (as required by rules, even if not used)
@@ -274,16 +292,7 @@
         
         // Only proceed if configuration seems valid (e.g., the object is not empty).
         if (Object.keys(firebaseConfig).length > 0) {
-            // const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js");
-            // const { getAuth, signInWithCustomToken, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js");
-            // const app = initializeApp(firebaseConfig);
-            // const auth = getAuth(app);
-            // if (__initial_auth_token) {
-            //     signInWithCustomToken(auth, __initial_auth_token);
-            // } else {
-            //     signInAnonymously(auth);
-            // }
-            console.log("Firebase globals detected. App ID:", appId);
+            // console.log("Firebase globals detected. App ID:", appId);
         }
     } catch (e) {
         console.error("Firebase initialization skipped or failed:", e);
