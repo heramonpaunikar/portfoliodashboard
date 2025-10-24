@@ -49,7 +49,7 @@
         </p>
     </header>
 
-    <!-- Configuration Section -->
+    <!-- Configuration Section (Now showing the fixed date) -->
     <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-lg mb-8 shadow-sm">
         <div class="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0">
             <div class="flex flex-col">
@@ -61,8 +61,9 @@
                 <p class="text-2xl font-bold text-indigo-900">0.15%</p>
             </div>
             <div class="flex flex-col">
-                <label for="startDate" class="text-sm font-semibold text-indigo-700 mb-1">Start Date:</label>
-                <input type="date" id="startDate" class="p-2 border border-indigo-300 rounded-lg text-lg focus:ring-indigo-500 focus:border-indigo-500" onchange="updateSimulation()">
+                <label class="text-sm font-semibold text-indigo-700 mb-1">Fixed Start Date:</label>
+                <!-- Fixed, non-changeable date display -->
+                <p class="text-2xl font-bold text-indigo-900">10/17/2025</p>
             </div>
         </div>
     </div>
@@ -71,9 +72,9 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         <!-- Card 1: Days Elapsed -->
         <div class="bg-blue-600 text-white p-6 rounded-xl shadow-lg transform hover:scale-[1.02] transition duration-300">
-            <p class="text-sm font-medium opacity-80">Days Elapsed (Until Today)</p>
+            <p class="text-sm font-medium opacity-80">Days Elapsed (Since Start)</p>
             <p id="daysElapsed" class="text-4xl font-extrabold mt-1">0</p>
-            <p class="text-xs mt-2 opacity-70">Calculated from start date to today.</p>
+            <p class="text-xs mt-2 opacity-70">Calculated since 10/17/2025.</p>
         </div>
 
         <!-- Card 2: Current Value -->
@@ -131,6 +132,10 @@
     const DAILY_RATE = 0.0015; // 0.15% as a decimal
     const DAILY_PROFIT = INITIAL_PRINCIPAL * DAILY_RATE; // 30000 * 0.0015 = 45
 
+    // HARDCODED FIXED START DATE: October 17, 2025
+    // Note: Month is 9 because months are 0-indexed (October = 9)
+    const FIXED_START_DATE = new Date(2025, 9, 17); 
+
     // New constants for time-based growth calculation
     const MS_PER_DAY = 1000 * 60 * 60 * 24;
     // Calculate the profit added per millisecond for a smooth visual ticker
@@ -141,7 +146,6 @@
     const currentValueEl = document.getElementById('currentValue');
     const totalProfitEl = document.getElementById('totalProfit');
     const profitPercentEl = document.getElementById('profitPercent');
-    const startDateInput = document.getElementById('startDate');
     const currentDateDisplay = document.getElementById('currentDateDisplay');
     const projectionBody = document.getElementById('projectionBody');
 
@@ -149,7 +153,6 @@
      * Utility function to format currency as a whole number (no decimals).
      */
     const formatCurrency = (amount) => {
-        // Use 0 minimum and maximum fraction digits to format as integer
         return Math.round(amount).toLocaleString('en-IN', {
             minimumFractionDigits: 0,
             maximumFractionDigits: 0
@@ -157,7 +160,7 @@
     };
 
     /**
-     * Calculates the precise simple growth based on milliseconds elapsed since start.
+     * Calculates the precise simple growth based on milliseconds elapsed since fixed start.
      * @param {number} ms - The number of milliseconds elapsed since the start.
      * @returns {number} The final calculated value.
      */
@@ -181,7 +184,6 @@
      * Renders a single row in the projection table.
      */
     const renderProjectionRow = (timeframe, days) => {
-        // Projections use the full days growth calculation for stable future estimates
         const finalValue = calculateDailyGrowth(days);
         const profit = finalValue - INITIAL_PRINCIPAL;
         const row = document.createElement('tr');
@@ -203,25 +205,11 @@
      * Main function to update the entire simulation display.
      */
     window.updateSimulation = () => {
-        const startDateString = startDateInput.value;
-        
-        if (!startDateString) {
-            // Reset if no date is set
-            daysElapsedEl.textContent = 'N/A';
-            currentValueEl.textContent = formatCurrency(INITIAL_PRINCIPAL);
-            totalProfitEl.textContent = formatCurrency(0);
-            profitPercentEl.textContent = '0.00% Gain';
-            currentDateDisplay.textContent = 'As of: No Start Date';
-            projectionBody.innerHTML = '';
-            return;
-        }
-
-        const startDate = new Date(startDateString);
         const today = new Date();
 
-        // 1. Calculate Time Elapsed
-        const totalMillisecondsElapsed = today.getTime() - startDate.getTime();
-        const daysDifference = totalMillisecondsElapsed / MS_PER_DAY; // Total days, including fractions
+        // 1. Calculate Time Elapsed using the fixed start date
+        const totalMillisecondsElapsed = today.getTime() - FIXED_START_DATE.getTime();
+        const daysDifference = totalMillisecondsElapsed / MS_PER_DAY; 
 
         // Calculate total full days elapsed (for display and projection base)
         const daysElapsed = Math.max(0, Math.floor(daysDifference)); 
@@ -268,15 +256,6 @@
 
     // Initialization Logic
     document.addEventListener('DOMContentLoaded', () => {
-        // Set the default start date to yesterday's date
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1); // Subtract 1 day
-        
-        const yyyy = yesterday.getFullYear();
-        const mm = String(yesterday.getMonth() + 1).padStart(2, '0'); // Months start at 0
-        const dd = String(yesterday.getDate()).padStart(2, '0');
-        
-        startDateInput.value = `${yyyy}-${mm}-${dd}`;
         updateSimulation();
         
         // Start the automatic update every second (1000ms)
